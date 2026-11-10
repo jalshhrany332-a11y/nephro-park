@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NEPHRO PARK | نيرو بارك</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden;background:#071526;font-family:"Noto Naskh Arabic","Segoe UI",Tahoma,sans-serif;color:#e6fbff}
+#scene{position:fixed;inset:0}
+#scene canvas{display:block}
+#top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:12px;z-index:5;pointer-events:none}
+.brand{pointer-events:auto;background:rgba(8,30,45,.82);backdrop-filter:blur(8px);border:1px solid rgba(34,211,238,.45);border-radius:18px;padding:10px 16px;box-shadow:0 0 24px rgba(34,211,238,.35);max-width:70vw}
+.brand h1{margin:0;font-size:19px;color:#7ef9ff}
+.brand h1 .ar-name{font-size:30px;font-weight:700;line-height:1.3}
+.brand h1 small{font-size:13px;font-weight:600;opacity:.85;letter-spacing:.5px}
+.brand p{margin:3px 0 0;font-size:13px;color:#bde9f5}
+.brand .s2{font-size:12px;opacity:.85}
+.btn{pointer-events:auto;border:0;border-radius:14px;padding:12px 16px;min-height:48px;min-width:48px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;background:#0c2b3f;color:#7ef9ff;border:1px solid rgba(34,211,238,.4);box-shadow:0 0 16px rgba(34,211,238,.25);transition:transform .15s,background .2s}
+.btn:hover{background:#15435c;transform:translateY(-2px)}
+.btn:focus-visible{outline:3px solid #ffb703;outline-offset:2px}
+.btn.primary{background:#06b6d4;color:#042f3a;border-color:transparent}
+.btn.primary:hover{background:#22d3ee}
+.logo{width:225px;height:68px;overflow:hidden;position:relative;margin-bottom:4px}
+.logo img{position:absolute;width:300px;height:auto;left:-35px;top:-106px}
+.credits{text-align:center;line-height:2}
+.credits .logo{margin:0 auto 6px;width:260px;height:80px}
+.credits .logo img{width:346px;left:-40px;top:-122px}
+.credits .names{list-style:none;padding:0;margin:10px 0;font-size:16px;font-weight:600;color:#0a5f6b}
+.credits .sup{font-size:15px;color:#2b5560;margin-top:8px}
+#creditsModal{position:fixed;inset:0;background:rgba(0,30,40,.55);display:none;align-items:center;justify-content:center;z-index:30;padding:16px}
+#creditsModal.open{display:flex}
+#creditsModal .box{background:#fff;color:#103642;border-radius:20px;padding:22px 24px;max-width:420px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 10px 40px rgba(0,0,0,.3)}
+.hint{position:fixed;top:118px;left:50%;transform:translateX(-50%);background:rgba(8,47,73,.9);color:#bff7ff;padding:8px 14px;border-radius:999px;font-size:13px;z-index:4;white-space:nowrap;pointer-events:none;transition:opacity .6s}
+#nav{position:fixed;bottom:12px;left:0;right:0;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:0 10px;z-index:5}
+#nav .btn{font-size:14px;padding:10px 12px;min-height:44px}
+#panel{position:fixed;top:0;bottom:0;right:0;width:min(440px,100vw);color:#103642;background:rgba(255,255,255,.95);backdrop-filter:blur(14px);box-shadow:-8px 0 30px rgba(0,40,60,.25);transform:translateX(105%);transition:transform .5s ease;z-index:10;overflow-y:auto;padding:52px 20px 30px}
+#panel.open{transform:none}
+#panel .x{position:absolute;top:12px;left:12px;min-width:44px;min-height:44px;padding:8px}
+.ph{--c:#0a8ea0;background:var(--c);color:#fff;border-radius:18px;padding:16px;display:flex;gap:14px;align-items:center;margin-bottom:14px}
+.emoji{font-size:40px}
+.ph h2{margin:0;font-size:22px}
+.sub{font-size:15px;margin-top:3px;direction:ltr;text-align:start}
+.intro{font-size:16px;line-height:1.9}
+.card{background:#f2fbfc;border:1px solid #cfeef2;border-radius:16px;padding:12px 14px;margin:10px 0}
+.card summary{font-weight:700;font-size:17px;cursor:pointer;color:#0a5f6b;min-height:40px;display:flex;align-items:center;gap:8px}
+.card ul{margin:10px 0 4px;padding-inline-start:22px;line-height:1.9;font-size:15.5px}
+.warn{background:#fff7e6;border-color:#f5d28a}
+.warn p{margin:0;font-size:14.5px;line-height:1.8}
+.refs{padding-inline-start:20px;line-height:2}
+.refs a{color:#0a6e7e;font-weight:600}
+.pbtns{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+#loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:#071526;color:#7ef9ff;z-index:20;transition:opacity 1.2s}
+#loader.hide{opacity:0;pointer-events:none}
+@media(max-width:600px){.brand h1{font-size:15px}.brand p{font-size:11px}#nav .btn{font-size:12px;padding:8px 9px}.hint{top:104px;font-size:11px}}
+</style>
+<script type="importmap">
+{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}
+</script>
+</head>
+<body>
+<div id="scene"></div>
+<header id="top">
+  <div class="brand">
+    <div class="logo"><img src="bisha_logo.jpg" alt="University of Bisha / جامعة بيشة"/></div>
+    <h1><span class="ar-name">نيرو بارك</span> <small>NEPHRO PARK</small></h1>
+    <p data-k="slogan1"></p>
+    <p class="s2" data-k="slogan2"></p>
+  </div>
+  <div style="display:flex;gap:8px;flex-direction:column;align-items:flex-end">
+    <button class="btn" id="langBtn"></button>
+    <button class="btn" id="creditsBtn" data-k="credits"></button>
+  </div>
+</header>
+<div id="creditsModal" role="dialog" aria-modal="true">
+  <div class="box credits">
+    <div class="logo"><img src="bisha_logo.jpg" alt="University of Bisha / جامعة بيشة"/></div>
+    <div data-k="teamTitle" style="font-weight:700;font-size:18px;color:#0a7c8c"></div>
+    <ul class="names">
+      <li>جنا مبارك الشهراني</li>
+      <li>لما مبارك الشهراني</li>
+      <li>سلوى فيصل الكوسي</li>
+      <li>ريما محمد القحطاني</li>
+      <li>أسيل هشام الجهني</li>
+      <li>ساره عبدالله الشهراني</li>
+      <li>تالا عبدالله الحربي</li>
+      <li>وديان حميدان الجهني</li>
+      <li>زينب ناجي العلوان</li>
+    </ul>
+    <div class="sup" data-k="supervisor"></div>
+    <div class="pbtns" style="justify-content:center;margin-top:16px"><button class="btn primary" id="creditsClose" data-k="close"></button></div>
+  </div>
+</div>
+<div id="hint" class="hint" data-k="hint"></div>
+<nav id="nav"></nav>
+<aside id="panel">
+  <button class="btn x" id="xBtn" aria-label="Close">✕</button>
+  <div id="panelBody"></div>
+</aside>
+<div id="loader" data-k="loading"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const UI = {
+  ar: {
+    slogan1: 'رحلة في عالم صحة الكلى',
+    slogan2: 'احمِ كليتيك اليوم، لصحة أفضل غدًا.',
+    close: 'إغلاق',
+    back: 'العودة إلى الحديقة',
+    overview: 'نظرة عامة',
+    refs: 'مراجع موثوقة',
+    disclaimer: 'هذا المحتوى تثقيفي ولا يُغني عن استشارة الطبيب المختص. لا تُستخدم هذه المعلومات للتشخيص أو لوصف الأدوية أو تحديد جرعاتها.',
+    hint: 'اضغط على أي ركن في الحديقة لاستكشافه',
+    switch: 'English',
+    credits: 'فريق العمل',
+    teamTitle: 'إعداد الطالبات',
+    supervisor: 'تحت إشراف: د.نهى',
+    loading: 'جارٍ تجهيز الحديقة...',
+    webgl: 'متصفحك لا يدعم العرض ثلاثي الأبعاد. يمكنك استخدام القائمة السفلية.'
+  },
+  en: {
+    slogan1: 'A journey into kidney health',
+    slogan2: 'Protect your kidneys today for a healthier tomorrow.',
+    close: 'Close',
+    back: 'Back to park',
+    overview: 'Park overview',
+    refs: 'Trusted references',
+    disclaimer: 'This content is educational and does not replace advice from a qualified doctor. Do not use it to diagnose or to choose medicines or doses.',
+    hint: 'Tap any corner of the park to explore it',
+    switch: 'العربية',
+    credits: 'Project team',
+    teamTitle: 'Prepared by',
+    supervisor: 'Supervised by: Dr. Noha',
+    loading: 'Preparing the park...',
+    webgl: 'Your browser does not support 3D. Use the bottom menu instead.'
+  }
+};
+
+const REFS = [
+  { name: 'NIDDK: Kidney disease information', url: 'https://www.niddk.nih.gov/health-information/kidney-disease' },
+  { name: 'CDC: Chronic kidney disease', url: 'https://www.cdc.gov/kidneydisease/' },
+  { name: 'National Kidney Foundation', url: 'https://www.kidney.org/' },
+  { name: 'KDIGO: Clinical practice guidelines', url: 'https://kdigo.org/guidelines/' },
+  { name: 'Saudi Ministry of Health', url: 'https://www.moh.gov.sa/' }
+];
+
+const GARDENS = [
+  {
+    color: '#38bdf8', icon: 'drop', emoji: '💧',
+    short: { ar: 'الترطيب', en: 'Hydration' },
+    title: { ar: 'حديقة الترطيب', en: 'Hydration Garden' },
+    intro: {
+      ar: 'الماء ضروري لكل جسم، والكلى تنظّم توازن السوائل والأملاح في الدم. والكمية المناسبة تختلف من شخص لآخر.',
+      en: 'Water is essential for everyone, and the kidneys regulate fluid and salt balance in the blood. The right amount differs from person to person.'
+    },
+    sections: [
+      { icon: '🫘', h: { ar: 'دور الكلى في توازن السوائل', en: 'The kidneys and fluid balance' },
+        items: {
+          ar: ['تُرشّح الكلى الدم وتتخلص من الفائض عبر البول.', 'تساعد على الحفاظ على توازن الأملاح وضغط الدم.'],
+          en: ['The kidneys filter the blood and remove extra fluid through urine.', 'They help keep salt levels and blood pressure in balance.']
+        } },
+      { icon: '⚠️', h: { ar: 'علامات الجفاف', en: 'Signs of dehydration' },
+        items: {
+          ar: ['عطش شديد وجفاف في الفم.', 'قلة التبول أو بول داكن اللون.', 'دوخة أو إرهاق عند الوقوف.'],
+          en: ['Strong thirst and a dry mouth.', 'Passing less urine or dark urine.', 'Dizziness or tiredness when standing up.']
+        } },
+      { icon: '🩺', h: { ar: 'تنبيه مهم لمرضى الكلى', en: 'Important note for kidney patients' },
+        items: {
+          ar: ['لا توجد كمية ماء واحدة مناسبة للجميع.', 'قد يحتاج بعض المرضى إلى تقييد السوائل بشكل فردي حسب تعليمات الطبيب.', 'لا تزِد السوائل ولا تقلّلها من تلقاء نفسك.'],
+          en: ['No single amount of water is right for everyone.', 'Some kidney patients need individual fluid limits set by their doctor.', 'Do not increase or decrease fluids on your own.']
+        } }
+    ]
+  },
+  {
+    color: '#22c55e', icon: 'food', emoji: '🥗',
+    short: { ar: 'الغذاء', en: 'Food' },
+    title: { ar: 'حديقة الغذاء الصحي', en: 'Healthy Food Garden' },
+    intro: {
+      ar: 'الغذاء المتوازن يساعد على حماية الكلى والقلب والأوعية الدموية، ويقلل خطر الأمراض المرتبطة بها.',
+      en: 'A balanced diet helps protect the kidneys, heart and blood vessels, and lowers the risk of related diseases.'
+    },
+    sections: [
+      { icon: '🧂', h: { ar: 'تقليل الملح والصوديوم', en: 'Reducing salt and sodium' },
+        items: {
+          ar: ['اقرأ الملصق الغذائي وقارن كمية الصوديوم بين المنتجات.', 'قلّل الأطعمة المالحة والمخللات والوجبات الجاهزة.'],
+          en: ['Read food labels and compare sodium content between products.', 'Cut back on salty foods, pickles and ready meals.']
+        } },
+      { icon: '🥦', h: { ar: 'اختيار الأطعمة الطازجة', en: 'Choosing fresh foods' },
+        items: {
+          ar: ['ركّز على الخضار والفواكه والحبوب الكاملة، مع مراعاة توصية طبيبك.', 'قلّل الأطعمة فائقة المعالجة والمشروبات السكرية.'],
+          en: ['Focus on vegetables, fruit and whole grains, following your doctor\'s advice.', 'Limit ultra-processed foods and sugary drinks.']
+        } },
+      { icon: '🔬', h: { ar: 'البوتاسيوم والفوسفور', en: 'Potassium and phosphorus' },
+        items: {
+          ar: ['لا توجد قيود عامة على البوتاسيوم أو الفوسفور لجميع الناس.', 'قد يحتاج مرضى الكلى إلى تعديل بعض الأطعمة حسب نتائج التحاليل، بتوجيه من الطبيب أو أخصائي التغذية.'],
+          en: ['There are no universal potassium or phosphorus restrictions for everyone.', 'Kidney patients may need to adjust some foods based on lab results, guided by their doctor or dietitian.']
+        } }
+    ]
+  },
+  {
+    color: '#f59e0b', icon: 'walk', emoji: '🚶',
+    short: { ar: 'النشاط', en: 'Activity' },
+    title: { ar: 'حديقة النشاط والحركة', en: 'Active Life Garden' },
+    intro: {
+      ar: 'النشاط البدني المنتظم يساعد على تحسين ضغط الدم والسكر ووزن الجسم، وكلها تؤثر على صحة الكلى.',
+      en: 'Regular physical activity helps control blood pressure, blood sugar and body weight, all of which affect kidney health.'
+    },
+    sections: [
+      { icon: '🏃', h: { ar: 'فوائد المشي والحركة', en: 'Benefits of walking and movement' },
+        items: {
+          ar: ['يحسّن الدورة الدموية ويساعد على التحكم بالوزن.', 'ابدأ بمدة قصيرة وزدها تدريجيًا.'],
+          en: ['It improves circulation and helps with weight control.', 'Start with short sessions and increase them gradually.']
+        } },
+      { icon: '🪑', h: { ar: 'تقليل الجلوس الطويل', en: 'Reducing long periods of sitting' },
+        items: {
+          ar: ['قم وتحرّك كل ساعة تقريبًا.', 'الحركة اليومية البسيطة لها فائدة واضحة.'],
+          en: ['Stand up and move about roughly every hour.', 'Simple daily movement makes a real difference.']
+        } },
+      { icon: '⚕️', h: { ar: 'قبل البدء', en: 'Before you start' },
+        items: {
+          ar: ['استشر طبيبك قبل بدء أي برنامج رياضي جديد، خاصة مع أمراض القلب أو الكلى أو السكري.'],
+          en: ['Talk to your doctor before starting a new exercise program, especially with heart, kidney or diabetes conditions.']
+        } }
+    ]
+  },
+  {
+    color: '#3b82f6', icon: 'bp', emoji: '🩺',
+    short: { ar: 'ضغط الدم', en: 'Blood Pressure' },
+    title: { ar: 'حديقة ضغط الدم', en: 'Blood Pressure Garden' },
+    intro: {
+      ar: 'ارتفاع ضغط الدم من أهم أسباب تلف الكلى، والكشف المبكر والمتابعة المنتظمة يساعدان على حمايتها.',
+      en: 'High blood pressure is one of the main causes of kidney damage. Early detection and regular follow-up help protect the kidneys.'
+    },
+    sections: [
+      { icon: '🫀', h: { ar: 'كيف يؤثر الضغط على الكلى', en: 'How blood pressure affects the kidneys' },
+        items: {
+          ar: ['الضغط المرتفع قد يُتلف الأوعية الدموية الدقيقة في الكلى مع الوقت.', 'قد يتراجع الترشيح تدريجيًا دون أعراض واضحة.'],
+          en: ['Persistently high pressure can damage the tiny blood vessels in the kidneys over time.', 'Filtering may decline gradually without obvious symptoms.']
+        } },
+      { icon: '📈', h: { ar: 'المتابعة المنتظمة', en: 'Regular monitoring' },
+        items: {
+          ar: ['قِس ضغطك بانتظام وسجّل القراءات لمراجعتها مع طبيبك.', 'اسأل طبيبك عن الهدف المناسب لحالتك.'],
+          en: ['Measure your pressure regularly and keep a record to review with your doctor.', 'Ask your doctor what target is right for you.']
+        } },
+      { icon: '💊', h: { ar: 'الالتزام بالعلاج', en: 'Sticking to treatment' },
+        items: {
+          ar: ['تناول الأدوية الموصوفة في مواعيدها، ولا توقفها دون استشارة الطبيب.', 'قلّل الملح كما ينصح طبيبك.'],
+          en: ['Take prescribed medicines on time, and do not stop them without asking your doctor.', 'Reduce salt as your doctor advises.']
+        } }
+    ]
+  },
+  {
+    color: '#0d9488', icon: 'glucose', emoji: '🩸',
+    short: { ar: 'السكري', en: 'Diabetes' },
+    title: { ar: 'حديقة التوعية بالسكري', en: 'Diabetes Awareness Garden' },
+    intro: {
+      ar: 'ارتفاع السكر لفترات طويلة قد يضر الأوعية الدموية الدقيقة في الكلى، وهذا ما يُعرف باعتلال الكلى السكري.',
+      en: 'Prolonged high blood sugar can harm the tiny blood vessels in the kidneys. This is known as diabetic kidney disease.'
+    },
+    sections: [
+      { icon: '🔥', h: { ar: 'أثر السكر غير المنضبط', en: 'Effect of uncontrolled sugar' },
+        items: {
+          ar: ['السكر المرتفع باستمرار يُتلف الأوعية الدموية الصغيرة في الكلى.', 'ضبط السكر من أهم وسائل حماية الكلى.'],
+          en: ['Persistently high sugar damages the small blood vessels in the kidneys.', 'Good blood sugar control is one of the most important ways to protect them.']
+        } },
+      { icon: '🧪', h: { ar: 'الفحص لمرضى السكري', en: 'Screening for people with diabetes' },
+        items: {
+          ar: ['يُنصح بفحص وظائف الكلى بشكل دوري، ويشمل تحليل الدم (eGFR) وتحليل البول لقياس الألبومين.', 'الكشف المبكر يساعد على إبطاء تقدم المرض.'],
+          en: ['Kidney function should be checked regularly, including a blood test (eGFR) and a urine albumin test.', 'Early detection helps slow the progression of the disease.']
+        } },
+      { icon: '🥗', h: { ar: 'نمط الحياة والعلاج', en: 'Lifestyle and treatment' },
+        items: {
+          ar: ['التزم بخطة السكر التي وضعها طبيبك.', 'حافظ على نشاط بدني وغذاء متوازن.'],
+          en: ['Follow the diabetes plan your doctor set for you.', 'Stay physically active and eat a balanced diet.']
+        } }
+    ]
+  },
+  {
+    color: '#8b5cf6', icon: 'pill', emoji: '💊',
+    short: { ar: 'الأدوية', en: 'Medication' },
+    title: { ar: 'حديقة الاستخدام الآمن للأدوية', en: 'Medication Safety Garden' },
+    intro: {
+      ar: 'بعض الأدوية، ومنها مسكنات الألم الشائعة، قد تؤثر على الكلى إذا استُخدمت دون استشارة أو لفترات طويلة.',
+      en: 'Some medicines, including common painkillers, can affect the kidneys when used without advice or for long periods.'
+    },
+    sections: [
+      { icon: '⚠️', h: { ar: 'مضادات الالتهاب غير الستيرويدية (NSAIDs)', en: 'NSAIDs' },
+        items: {
+          ar: ['أمثلة شائعة: الإيبوبروفين والنابروكسين.', 'الاستعمال المتكرر أو الطويل دون إشراف قد يؤثر على الكلى، خاصة مع الجفاف أو أمراض الكلى.'],
+          en: ['Common examples include ibuprofen and naproxen.', 'Frequent or long-term use without supervision may affect the kidneys, especially with dehydration or existing kidney disease.']
+        } },
+      { icon: '🌿', h: { ar: 'الأعشاب والمكملات', en: 'Herbs and supplements' },
+        items: {
+          ar: ['بعض الأعشاب والمكملات قد تتداخل مع الأدوية أو تؤثر على الكلى.', 'أخبر طبيبك وصيدليّك بكل ما تتناوله، بما فيه المنتجات العشبية.'],
+          en: ['Some herbs and supplements can interact with medicines or affect the kidneys.', 'Tell your doctor and pharmacist about everything you take, including herbal products.']
+        } },
+      { icon: '📋', h: { ar: 'الاستخدام الآمن', en: 'Safe use' },
+        items: {
+          ar: ['لا تتناول أي دواء دون استشارة مختص.', 'احتفظ بقائمة محدّثة بأدويتك وشاركها مع كل مقدم رعاية صحية.'],
+          en: ['Do not take any medicine without advice from a qualified professional.', 'Keep an up-to-date list of your medicines and share it with every healthcare provider.']
+        } }
+    ]
+  },
+  {
+    color: '#06b6d4', icon: 'lab', emoji: '🔬',
+    short: { ar: 'الفحص المبكر', en: 'Early Detection' },
+    title: { ar: 'حديقة الفحص المبكر', en: 'Early Detection Garden' },
+    intro: {
+      ar: 'مرض الكلى المبكر قد لا يسبب أعراضًا واضحة، لذلك يبقى الفحص الوسيلة الأهم للاكتشاف.',
+      en: 'Early kidney disease may cause no symptoms at all, so screening is the most important way to find it.'
+    },
+    sections: [
+      { icon: '🧫', h: { ar: 'أهم الفحوصات', en: 'Key tests' },
+        items: {
+          ar: ['الكرياتينين في الدم: يُستخدم لتقدير وظائف الكلى.', 'معدل الترشيح الكبيبي (eGFR): يُحسب من الكرياتينين ويعطي تقديرًا لوظيفة الكلى.', 'نسبة الألبومين إلى الكرياتينين في البول (UACR): تكشف تسرب الألبومين.', 'تحليل البول: يبحث عن الدم أو البروتين وعلامات أخرى.'],
+          en: ['Serum creatinine: used to estimate kidney function.', 'Estimated GFR (eGFR): calculated from creatinine and gives an estimate of kidney function.', 'Urine albumin-to-creatinine ratio (UACR): detects albumin leaking into the urine.', 'Urinalysis: looks for blood, protein and other signs.']
+        } },
+      { icon: '👥', h: { ar: 'من يحتاج الفحص أكثر', en: 'Who needs screening more' },
+        items: {
+          ar: ['مرضى السكري أو ضغط الدم المرتفع.', 'من لديهم تاريخ عائلي لأمراض الكلى.'],
+          en: ['People with diabetes or high blood pressure.', 'People with a family history of kidney disease.']
+        } },
+      { icon: '📌', h: { ar: 'ملاحظة مهمة', en: 'Important note' },
+        items: {
+          ar: ['تفسير النتائج يعتمد على طبيبك، ولا تُفسَّر نتيجة واحدة بمعزل عن غيرها.'],
+          en: ['Your doctor interprets the results, and a single result should not be read on its own.']
+        } }
+    ]
+  },
+  {
+    color: '#10b981', icon: 'shield', emoji: '🛡️',
+    short: { ar: 'الحماية', en: 'Protection' },
+    title: { ar: 'حديقة الحماية اليومية', en: 'Daily Protection Garden' },
+    intro: {
+      ar: 'عادات بسيطة يوميًا تساعد على حماية الكلى على المدى الطويل.',
+      en: 'Simple daily habits help protect the kidneys over the long term.'
+    },
+    sections: [
+      { icon: '🌤️', h: { ar: 'عادات الحياة', en: 'Lifestyle habits' },
+        items: {
+          ar: ['الإقلاع عن التدخين.', 'نوم صحي وكافٍ.', 'الحفاظ على وزن صحي.'],
+          en: ['Stop smoking.', 'Get healthy, sufficient sleep.', 'Maintain a healthy weight.']
+        } },
+      { icon: '🧭', h: { ar: 'الوقاية والمتابعة', en: 'Prevention and follow-up' },
+        items: {
+          ar: ['علاج التهابات المسالك البولية في وقتها وتحت إشراف طبي.', 'المتابعة الطبية المنتظمة، وإدارة الأمراض المزمنة.'],
+          en: ['Treat urinary tract infections promptly and under medical supervision.', 'Keep up regular medical follow-up and manage chronic conditions.']
+        } },
+      { icon: '🚩', h: { ar: 'علامات تستدعي المراجعة', en: 'Warning signs to check' },
+        items: {
+          ar: ['تورم في القدمين أو الوجه.', 'دم في البول أو رغوة كثيفة ومستمرة.', 'تغيّر ملحوظ في كمية البول.', 'ألم في أسفل الظهر أو الجانبين.', 'هذه العلامات لا تعني بالضرورة وجود مرض، لكن يُنصح بمراجعة الطبيب.'],
+          en: ['Swelling in the legs or face.', 'Blood in the urine or persistent heavy foam.', 'A noticeable change in how much you urinate.', 'Pain in the lower back or sides.', 'These signs do not necessarily mean disease, but you should see a doctor.']
+        } }
+    ]
+  }
+];
+
+const HOME_POS = new THREE.Vector3(0, 58, 78);
+const HOME_T = new THREE.Vector3(0, 3, 0);
+const R = 20;
+
+let lang = 'ar';
+let selected = null;
+let tween = null;
+
+const panel = document.getElementById('panel');
+const panelBody = document.getElementById('panelBody');
+const hint = document.getElementById('hint');
+const loader = document.getElementById('loader');
+
+let renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+} catch (e) {
+  loader.textContent = UI[lang].webgl;
+  throw e;
+}
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.getElementById('scene').appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#071526');
+scene.fog = new THREE.Fog('#071526', 160, 340);
+
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 600);
+camera.position.set(0, 130, 1);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.maxPolarAngle = Math.PI * 0.47;
+controls.minDistance = 12;
+controls.maxDistance = 150;
+controls.target.set(0, 0, 0);
+
+scene.add(new THREE.HemisphereLight('#bfefff', '#0b2233', 0.9));
+const sun = new THREE.DirectionalLight('#e0f7ff', 1.2);
+sun.position.set(40, 90, 30);
+sun.castShadow = true;
+sun.shadow.mapSize.set(2048, 2048);
+Object.assign(sun.shadow.camera, { left: -70, right: 70, top: 70, bottom: -70, far: 300 });
+scene.add(sun);
+
+// Ground
+const ground = new THREE.Mesh(
+  new THREE.CylinderGeometry(80, 80, 1, 96),
+  new THREE.MeshStandardMaterial({ color: '#1d5b57', roughness: 0.9 })
+);
+ground.position.y = -0.5;
+ground.receiveShadow = true;
+scene.add(ground);
+
+// Glowing river around the island, plus a starry sky
+const moat = new THREE.Mesh(
+  new THREE.TorusGeometry(50, 1.6, 12, 180),
+  new THREE.MeshStandardMaterial({ color: '#0ea5e9', emissive: '#38bdf8', emissiveIntensity: 0.9, transparent: true, opacity: 0.85 })
+);
+moat.rotation.x = Math.PI / 2;
+moat.position.y = 0.1;
+scene.add(moat);
+const starPos = [];
+for (let i = 0; i < 600; i++) {
+  const th = Math.random() * Math.PI * 2, ph = Math.random() * Math.PI * 0.45, rr = 200;
+  starPos.push(rr * Math.sin(ph) * Math.cos(th), rr * Math.cos(ph) + 20, rr * Math.sin(ph) * Math.sin(th));
+}
+const starGeo = new THREE.BufferGeometry();
+starGeo.setAttribute('position', new THREE.Float32BufferAttribute(starPos, 3));
+scene.add(new THREE.Points(starGeo, new THREE.PointsMaterial({ color: '#cfefff', size: 1.2 })));
+
+// Plaza and walking paths
+const plaza = new THREE.Mesh(new THREE.CircleGeometry(7, 64), new THREE.MeshStandardMaterial({ color: '#1a4f5c', emissive: '#0e7490', emissiveIntensity: 0.3 }));
+plaza.rotation.x = -Math.PI / 2; plaza.position.y = 0.04; plaza.receiveShadow = true;
+scene.add(plaza);
+
+const ringPath = new THREE.Mesh(new THREE.RingGeometry(R - 1.2, R + 1.2, 128), new THREE.MeshStandardMaterial({ color: '#12404f', emissive: '#22d3ee', emissiveIntensity: 0.35 }));
+ringPath.rotation.x = -Math.PI / 2; ringPath.position.y = 0.03; ringPath.receiveShadow = true;
+scene.add(ringPath);
+
+const entryPath = new THREE.Mesh(new THREE.PlaneGeometry(3, 24), new THREE.MeshStandardMaterial({ color: '#12404f', emissive: '#22d3ee', emissiveIntensity: 0.35 }));
+entryPath.rotation.x = -Math.PI / 2; entryPath.position.set(0, 0.035, 12); entryPath.receiveShadow = true;
+scene.add(entryPath);
+
+// Bean-shaped kidney geometry (notch on the +x side before rotation)
+function kidneyGeometry() {
+  const s = new THREE.Shape();
+  // plump, rounded cartoon-style kidney with a clear inner notch
+  s.moveTo(0, 1.7);
+  s.bezierCurveTo(1.2, 1.8, 1.35, 0.6, 1.05, 0);
+  s.bezierCurveTo(0.85, -1.0, 0.5, -1.7, 0, -1.6);
+  s.bezierCurveTo(-0.8, -1.5, -1.0, -0.7, -0.5, -0.15);
+  s.bezierCurveTo(-0.6, 0.35, -1.1, 0.9, -0.9, 1.4);
+  s.bezierCurveTo(-0.7, 1.7, -0.3, 1.8, 0, 1.7);
+  const geo = new THREE.ExtrudeGeometry(s, {
+    depth: 0.7, bevelEnabled: true, bevelThickness: 0.2, bevelSize: 0.2, bevelSegments: 6, curveSegments: 32
+  });
+  geo.center();
+  geo.computeVertexNormals();
+  return geo;
+}
+
+// Central kidney sculpture
+const sculpt = new THREE.Group();
+scene.add(sculpt);
+const ped = new THREE.Mesh(new THREE.CylinderGeometry(4.5, 5, 1.2, 64), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.25 }));
+ped.position.y = 0.6; ped.castShadow = true; ped.receiveShadow = true;
+sculpt.add(ped);
+const halo = new THREE.Mesh(new THREE.TorusGeometry(4.2, 0.14, 16, 96), new THREE.MeshStandardMaterial({ color: '#14b8a6', emissive: '#14b8a6', emissiveIntensity: 0.8 }));
+halo.rotation.x = Math.PI / 2; halo.position.y = 1.35;
+sculpt.add(halo);
+const kidMat = new THREE.MeshPhysicalMaterial({ color: '#e0433a', roughness: 0.25, clearcoat: 1, clearcoatRoughness: 0.1 });
+const kidGeo = kidneyGeometry();
+[[-1.8, 0.15], [1.8, -0.15]].forEach(([x, rz]) => {
+  const k = new THREE.Mesh(kidGeo, kidMat);
+  k.scale.set(1.0, 1.0, 1.0);
+  k.position.set(x, 4.2, 0);
+  k.rotation.z = rz;
+  // left kidney's notch faces the center (+x), so rotate it around Y
+  k.rotation.y = x < 0 ? Math.PI : 0;
+  k.castShadow = true;
+  sculpt.add(k);
+  // cute face on the front side (flips for the rotated left kidney)
+  const faceZ = x < 0 ? -0.8 : 0.8;
+  const eyeMat = new THREE.MeshStandardMaterial({ color: '#1f1f1f', roughness: 0.3 });
+  const blushMat = new THREE.MeshStandardMaterial({ color: '#ff8a9a', roughness: 0.6, transparent: true, opacity: 0.8 });
+  [-0.3, 0.45].forEach((ex) => {
+    const e = new THREE.Mesh(new THREE.SphereGeometry(0.1, 16, 12), eyeMat);
+    e.position.set(ex, 0.35, faceZ);
+    k.add(e);
+    const b = new THREE.Mesh(new THREE.SphereGeometry(0.14, 16, 12), blushMat);
+    b.position.set(ex * 1.4, 0.0, faceZ);
+    k.add(b);
+  });
+});
+
+// Water pools between pavilions
+const pools = [];
+[1, 3, 5, 7].forEach((k) => {
+  const a = (k * Math.PI) / 4;
+  const x = Math.cos(a) * 11, z = Math.sin(a) * 11;
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(2.7, 0.22, 12, 48), new THREE.MeshStandardMaterial({ color: '#ffffff' }));
+  rim.rotation.x = Math.PI / 2; rim.position.set(x, 0.3, z);
+  const water = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.6, 0.3, 48), new THREE.MeshStandardMaterial({ color: '#3fbde6', transparent: true, opacity: 0.85, roughness: 0.1 }));
+  water.position.set(x, 0.15, z);
+  const ripple = new THREE.Mesh(new THREE.RingGeometry(0.6, 0.8, 40), new THREE.MeshBasicMaterial({ color: '#e0faff', transparent: true, opacity: 0.7, side: THREE.DoubleSide }));
+  ripple.rotation.x = -Math.PI / 2; ripple.position.set(x, 0.32, z);
+  scene.add(rim, water, ripple);
+  pools.push({ ripple });
+});
+
+// Trees
+const treeCols = ['#1f7a6d', '#238f7b', '#17665d', '#2fa58f'];
+for (let k = 0; k < 70; k++) {
+  const a = k * 2.399963;
+  const r = 27 + (k % 5) * 4.2;
+  const x = Math.cos(a) * r, z = Math.sin(a) * r;
+  if (Math.abs(x) < 7 && z > 14) continue;
+  const s = 0.9 + (k % 3) * 0.25;
+  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.25 * s, 0.35 * s, 2.4 * s, 8), new THREE.MeshStandardMaterial({ color: '#8b5e3c' }));
+  trunk.position.set(x, 1.2 * s, z); trunk.castShadow = true;
+  const crown = new THREE.Mesh(new THREE.IcosahedronGeometry(1.7 * s, 1), new THREE.MeshStandardMaterial({ color: treeCols[k % 4], roughness: 0.8, flatShading: true }));
+  crown.position.set(x, 3.6 * s, z); crown.castShadow = true;
+  scene.add(trunk, crown);
+}
+
+// Flowers
+const flowerCols = ['#ff8fab', '#ffd166', '#c77dff', '#ffffff'];
+for (let k = 0; k < 60; k++) {
+  const a = k * 0.61 + 0.3;
+  const r = 23 + (k % 4) * 1.5;
+  const f = new THREE.Mesh(new THREE.SphereGeometry(0.2, 10, 8), new THREE.MeshStandardMaterial({ color: flowerCols[k % 4], emissive: flowerCols[k % 4], emissiveIntensity: 0.15 }));
+  f.position.set(Math.cos(a) * r, 0.25, Math.sin(a) * r);
+  scene.add(f);
+}
+
+// Entrance arch
+const entrance = new THREE.Group();
+const pillarMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.3 });
+[-4.5, 4.5].forEach((x) => {
+  const p = new THREE.Mesh(new THREE.BoxGeometry(1.2, 7, 1.2), pillarMat);
+  p.position.set(x, 3.5, 0); p.castShadow = true;
+  entrance.add(p);
+});
+const beam = new THREE.Mesh(new THREE.BoxGeometry(10.8, 1.2, 1.4), new THREE.MeshStandardMaterial({ color: '#0a8ea0' }));
+beam.position.y = 7.4; beam.castShadow = true;
+entrance.add(beam);
+const entranceSign = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthTest: false }));
+entranceSign.scale.set(9, 2.25, 1);
+entranceSign.position.set(0, 9.6, 0);
+entrance.add(entranceSign);
+entrance.position.set(0, 0, R + 4);
+scene.add(entrance);
+
+// Labels
+function drawLabel(sprite, txt) {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 128;
+  const x = c.getContext('2d');
+  x.fillStyle = 'rgba(8,30,45,0.88)';
+  x.beginPath();
+  if (x.roundRect) x.roundRect(4, 20, 504, 88, 30); else x.rect(4, 20, 504, 88);
+  x.fill();
+  x.fillStyle = '#7ef9ff';
+  x.font = 'bold 46px "Noto Naskh Arabic", "Segoe UI", sans-serif';
+  x.textAlign = 'center';
+  x.textBaseline = 'middle';
+  x.fillText(txt, 256, 66);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  if (sprite.material.map) sprite.material.map.dispose();
+  sprite.material.map = tex;
+  sprite.material.needsUpdate = true;
+}
+
+// Procedural icons
+function makeIcon(type, colHex) {
+  const g = new THREE.Group();
+  const add = (geo, c, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0) => {
+    const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: c, roughness: 0.35, metalness: 0.05 }));
+    m.position.set(x, y, z);
+    m.rotation.set(rx, ry, rz);
+    m.castShadow = true;
+    g.add(m);
+    return m;
+  };
+  switch (type) {
+    case 'drop':
+      add(new THREE.SphereGeometry(0.7, 28, 20), colHex, 0, -0.2);
+      add(new THREE.ConeGeometry(0.7, 1.5, 28), colHex, 0, 0.75);
+      break;
+    case 'food':
+      add(new THREE.SphereGeometry(0.8, 28, 20), '#e04b3a', -0.4, 0);
+      add(new THREE.SphereGeometry(0.55, 24, 16), '#f2c94c', 0.7, -0.1);
+      add(new THREE.SphereGeometry(0.35, 16, 12), '#4caf50', 0.2, 0.85);
+      break;
+    case 'walk':
+      add(new THREE.TorusGeometry(1, 0.14, 16, 48), colHex, 0, 0, 0, Math.PI / 2);
+      add(new THREE.SphereGeometry(0.28, 16, 12), '#ffffff', 0, 1.2);
+      add(new THREE.CylinderGeometry(0.14, 0.14, 0.8, 12), '#ffffff', 0, 0.6);
+      break;
+    case 'bp':
+      add(new THREE.BoxGeometry(1.5, 1.9, 0.4), '#1f2d3d');
+      add(new THREE.BoxGeometry(1.1, 0.6, 0.05), '#7ff0e0', 0, 0.4, 0.22);
+      add(new THREE.TorusGeometry(0.5, 0.1, 12, 32), colHex, 0, -0.55, 0.25);
+      break;
+    case 'glucose':
+      add(new THREE.OctahedronGeometry(0.95), colHex);
+      break;
+    case 'pill':
+      add(new THREE.CapsuleGeometry(0.36, 1.1, 8, 16), colHex, 0, 0, 0, 0, 0, Math.PI / 4);
+      add(new THREE.CapsuleGeometry(0.36, 1.1, 8, 16), '#ffffff', 0.6, -0.6, 0, 0, 0, Math.PI / 4);
+      break;
+    case 'lab':
+      [-1, 0, 1].forEach((k) => {
+        add(new THREE.CylinderGeometry(0.16, 0.16, 1.6, 16), '#ffffff', k * 0.5, 0);
+        add(new THREE.CylinderGeometry(0.13, 0.13, 0.9, 16), colHex, k * 0.5, -0.25);
+      });
+      break;
+    case 'shield': {
+      const s = add(new THREE.SphereGeometry(1, 28, 20, 0, Math.PI * 2, 0, Math.PI / 2), colHex);
+      s.scale.set(0.9, 1.2, 0.35);
+      break;
+    }
+  }
+  return g;
+}
+
+// Themed pavilions: each garden gets its own building, like the concept image
+function buildTheme(type, c) {
+  const g = new THREE.Group();
+  const col = new THREE.Color(c);
+  const M = (color, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness: 0.3, ...extra });
+  const neonMat = (color) => M(color, { emissive: new THREE.Color(color), emissiveIntensity: 0.9 });
+  const add = (parent, geo, mat, x = 0, y = 0, z = 0, rx = 0, rz = 0) => {
+    const m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    m.rotation.x = rx;
+    m.rotation.z = rz;
+    m.castShadow = true;
+    m.receiveShadow = true;
+    parent.add(m);
+    return m;
+  };
+
+  // Glowing platform with neon rim
+  add(g, new THREE.CylinderGeometry(4.2, 4.4, 0.6, 64), M('#ffffff'), 0, 0.3, 0);
+  add(g, new THREE.TorusGeometry(4.1, 0.12, 12, 96), neonMat(c), 0, 0.65, 0, Math.PI / 2);
+
+  // Translucent glass dome around the building
+  const glass = new THREE.Mesh(
+    new THREE.SphereGeometry(3.6, 40, 24, 0, Math.PI * 2, 0, Math.PI / 2),
+    new THREE.MeshStandardMaterial({ color: col, transparent: true, opacity: 0.22, roughness: 0.05, side: THREE.DoubleSide, depthWrite: false })
+  );
+  glass.position.y = 0.6;
+  glass.scale.set(1, 1.1, 1);
+  g.add(glass);
+
+  const S = new THREE.Group();
+  S.position.y = 0.6;
+  g.add(S);
+
+  switch (type) {
+    case 'drop': {
+      const pts = [];
+      for (let t = 0; t <= 1.0001; t += 0.1) {
+        const r = Math.sin(Math.PI * t) * (1.2 - 0.5 * t);
+        pts.push(new THREE.Vector2(Math.max(r, 0.001), t * 3.6));
+      }
+      add(S, new THREE.LatheGeometry(pts, 48), M(c, { transparent: true, opacity: 0.8, roughness: 0.05 }));
+      add(S, new THREE.SphereGeometry(0.5, 24, 16), neonMat('#e0faff'), 0, 1.6, 1.4);
+      for (let k = 0; k < 3; k++) {
+        const a = k * 2.1;
+        add(S, new THREE.SphereGeometry(0.22, 16, 12), neonMat(c), Math.cos(a) * 2.6, 1.2 + k * 0.6, Math.sin(a) * 2.6);
+      }
+      break;
+    }
+    case 'food': {
+      const bowl = [[0.01, 0], [1.2, 0.25], [2.1, 1.2], [2.5, 2.2], [2.5, 2.3]].map(([x, y]) => new THREE.Vector2(x, y));
+      add(S, new THREE.LatheGeometry(bowl, 40), M(c, { roughness: 0.6 }));
+      add(S, new THREE.TorusGeometry(2.5, 0.12, 12, 48), neonMat('#ffffff'), 0, 2.3, 0, Math.PI / 2);
+      ['#e04b3a', '#f59e0b', '#84cc16', '#fb923c', '#a3e635', '#ef4444'].forEach((fc, k) => {
+        const a = (k * Math.PI) / 3;
+        add(S, new THREE.SphereGeometry(0.55, 20, 14), M(fc), Math.cos(a) * 1.2, 2.4 + (k % 2) * 0.4, Math.sin(a) * 1.2);
+      });
+      add(S, new THREE.SphereGeometry(0.7, 20, 14), M('#f2c94c'), 0, 2.6, 0);
+      for (let k = 0; k < 4; k++) {
+        const a = k * (Math.PI / 2) + 0.4;
+        add(S, new THREE.IcosahedronGeometry(0.7, 1), M('#2e8b57'), Math.cos(a) * 3.4, 0.7, Math.sin(a) * 3.4);
+      }
+      break;
+    }
+    case 'walk': {
+      [1.2, 2.6].forEach((y) => add(S, new THREE.TorusGeometry(2.2, 0.22, 14, 64), M(c, { emissive: col, emissiveIntensity: 0.3 }), 0, y, 0, Math.PI / 2));
+      for (let k = 0; k < 4; k++) {
+        const a = k * (Math.PI / 2);
+        add(S, new THREE.CylinderGeometry(0.18, 0.18, 2.6, 12), M('#ffffff'), Math.cos(a) * 2.2, 1.3, Math.sin(a) * 2.2);
+      }
+      add(S, new THREE.CylinderGeometry(0.1, 0.1, 1.2, 8), M('#ffffff'), 0, 3.0, 0);
+      add(S, new THREE.SphereGeometry(0.35, 16, 12), neonMat('#fde68a'), 0, 3.6, 0);
+      break;
+    }
+    case 'bp': {
+      add(S, new THREE.CylinderGeometry(1.5, 1.7, 3.6, 40), M('#1f2d3d', { roughness: 0.4 }), 0, 1.8, 0);
+      add(S, new THREE.BoxGeometry(1.8, 0.9, 0.12), neonMat('#7ff0e0'), 0, 2.6, 1.6);
+      add(S, new THREE.TorusGeometry(1.0, 0.14, 14, 48), neonMat(c), 0, 4.2, 0, Math.PI / 2);
+      add(S, new THREE.BoxGeometry(0.1, 0.9, 0.1), M('#ffffff'), 0, 4.6, 0, 0, 0.6);
+      add(S, new THREE.SphereGeometry(0.22, 12, 10), M('#ef4444'), 0, 4.2, 0);
+      break;
+    }
+    case 'glucose': {
+      const crystal = add(S, new THREE.OctahedronGeometry(1.8), M(c, { transparent: true, opacity: 0.85, emissive: col, emissiveIntensity: 0.25, roughness: 0.1 }), 0, 2.6, 0);
+      crystal.scale.set(1, 1.5, 1);
+      add(S, new THREE.CylinderGeometry(1.5, 1.7, 0.8, 40), M('#ffffff'), 0, 0.4, 0);
+      for (let k = 0; k < 3; k++) {
+        add(S, new THREE.SphereGeometry(0.22, 12, 10), neonMat('#fbbf24'), Math.cos(k * 2.1) * 2.4, 1.6 + k * 0.5, Math.sin(k * 2.1) * 2.4);
+      }
+      break;
+    }
+    case 'pill': {
+      add(S, new THREE.CapsuleGeometry(0.75, 2.2, 12, 24), M(c), 0, 2.6, 0, 0, Math.PI / 4);
+      add(S, new THREE.CapsuleGeometry(0.75, 1.2, 12, 24), M('#ffffff'), 1.2, 1.7, 0, 0, Math.PI / 4);
+      for (let k = 0; k < 3; k++) {
+        const a = k * 2.1 + 0.5;
+        add(S, new THREE.CylinderGeometry(0.4, 0.4, 1.1, 20), M('#f59e0b'), Math.cos(a) * 2.7, 0.9, Math.sin(a) * 2.7);
+      }
+      break;
+    }
+    case 'lab': {
+      add(S, new THREE.BoxGeometry(5, 0.6, 2.2), M('#ffffff'), 0, 0.3, 0);
+      for (let k = -2; k <= 2; k++) {
+        add(S, new THREE.CylinderGeometry(0.2, 0.2, 2.6, 16), M('#ffffff', { transparent: true, opacity: 0.5 }), k * 0.8, 2.0, 0);
+        add(S, new THREE.CylinderGeometry(0.16, 0.16, 1.4, 16), neonMat(k % 2 ? c : '#f472b6'), k * 0.8, 1.6, 0);
+      }
+      add(S, new THREE.BoxGeometry(3.6, 0.14, 0.14), neonMat('#7ff0e0'), 0, 3.6, 1.6);
+      break;
+    }
+    case 'shield': {
+      const dome = add(S, new THREE.SphereGeometry(2.4, 40, 24, 0, Math.PI * 2, 0, Math.PI / 2), M(c, { transparent: true, opacity: 0.6, roughness: 0.2 }), 0, 0, 0);
+      dome.scale.set(1, 1.3, 0.45);
+      [-0.7, 0.7].forEach((x) => {
+        const k = add(S, kidneyGeometry(), M('#b5473f', { roughness: 0.45 }), x, 1.6, 0.2);
+        k.scale.set(0.5, 0.5, 0.5);
+        k.rotation.y = x < 0 ? Math.PI : 0;
+      });
+      add(S, new THREE.TorusGeometry(2.6, 0.12, 12, 64), neonMat(c), 0, 0.1, 0, Math.PI / 2);
+      break;
+    }
+  }
+  return { group: g, glass, spin: S };
+}
+
+// Pavilions
+const pavilions = [];
+const pickables = [];
+const icons = [];
+const labels = [];
+GARDENS.forEach((g, i) => {
+  const a = Math.PI / 8 + (i * Math.PI) / 4;
+  const grp = new THREE.Group();
+  grp.position.set(Math.cos(a) * R, 0, Math.sin(a) * R);
+  const col = new THREE.Color(g.color);
+
+  const themed = buildTheme(g.icon, g.color);
+  const glass = themed.glass;
+  icons.push(themed.spin);
+
+  const ring = new THREE.Mesh(
+    new THREE.RingGeometry(3.9, 4.6, 64),
+    new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: 0, side: THREE.DoubleSide })
+  );
+  ring.rotation.x = -Math.PI / 2; ring.position.y = 0.06;
+
+  const label = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthTest: false }));
+  label.scale.set(7.5, 1.9, 1);
+  label.position.y = 8.4;
+  labels.push({ sprite: label, i });
+
+  grp.add(themed.group, ring, label);
+  grp.userData = { ring, glass };
+  scene.add(grp);
+  pavilions.push(grp);
+
+  [themed.group].forEach((o) => o.traverse((m) => {
+    if (m.isMesh) { m.userData.idx = i; pickables.push(m); }
+  }));
+});
+
+function refreshLabels() {
+  labels.forEach(({ sprite, i }) => drawLabel(sprite, GARDENS[i].short[lang]));
+}
+drawLabel(entranceSign, 'نيرو بارك');
+refreshLabels();
+
+// Camera tween
+function flyTo(pos, target, dur = 2, done) {
+  controls.enabled = false;
+  tween = {
+    fp: camera.position.clone(), ft: controls.target.clone(),
+    tp: pos, tt: target, t0: performance.now(), dur: dur * 1000, done
+  };
+}
+function updateTween() {
+  if (!tween) return;
+  const k = Math.min((performance.now() - tween.t0) / tween.dur, 1);
+  const e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+  camera.position.lerpVectors(tween.fp, tween.tp, e);
+  controls.target.lerpVectors(tween.ft, tween.tt, e);
+  if (k >= 1) {
+    const d = tween.done;
+    tween = null;
+    controls.enabled = true;
+    if (d) d();
+  }
+}
+
+// Selection
+function highlight(i) {
+  pavilions.forEach((p, k) => {
+    p.userData.ring.material.opacity = k === i ? 0.7 : 0;
+    p.userData.glass.material.opacity = k === i ? 0.55 : 0.3;
+  });
+}
+
+function renderPanel(i) {
+  const g = GARDENS[i];
+  const U = UI[lang];
+  const secs = g.sections.map((s, k) =>
+    `<details class="card" ${k === 0 ? 'open' : ''}>
+      <summary><span>${s.icon}</span>${s.h[lang]}</summary>
+      <ul>${s.items[lang].map((x) => `<li>${x}</li>`).join('')}</ul>
+    </details>`).join('');
+  const refs = REFS.map((r) => `<li><a href="${r.url}" target="_blank" rel="noopener noreferrer">${r.name}</a></li>`).join('');
+  panelBody.innerHTML = `
+    <div class="ph" style="--c:${g.color}">
+      <span class="emoji">${g.emoji}</span>
+      <div><h2>${g.title.ar}</h2><div class="sub">${g.title.en}</div></div>
+    </div>
+    <p class="intro">${g.intro[lang]}</p>
+    ${secs}
+    <div class="card warn"><p>${U.disclaimer}</p></div>
+    <details class="card"><summary>${U.refs}</summary><ul class="refs">${refs}</ul></details>
+    <div class="pbtns">
+      <button class="btn" id="bClose">${U.close}</button>
+      <button class="btn primary" id="bBack">${U.back}</button>
+    </div>`;
+  document.getElementById('bClose').onclick = closeGarden;
+  document.getElementById('bBack').onclick = returnHome;
+  panel.scrollTop = 0;
+}
+
+function openGarden(i) {
+  selected = i;
+  highlight(i);
+  renderPanel(i);
+  panel.classList.add('open');
+  hint.style.opacity = 0;
+  const p = pavilions[i].position;
+  const out = new THREE.Vector3(p.x, 0, p.z).normalize();
+  flyTo(
+    new THREE.Vector3(p.x + out.x * 12, 9, p.z + out.z * 12),
+    new THREE.Vector3(p.x, 3, p.z),
+    1.8
+  );
+}
+
+function closeGarden() {
+  selected = null;
+  highlight(-1);
+  panel.classList.remove('open');
+}
+
+function returnHome() {
+  closeGarden();
+  flyTo(HOME_POS, HOME_T, 2.2);
+}
+
+document.getElementById('xBtn').onclick = closeGarden;
+addEventListener('keydown', (e) => { if (e.key === 'Escape') closeGarden(); });
+
+// Picking
+const ray = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+let down = null;
+renderer.domElement.addEventListener('pointerdown', (e) => { down = { x: e.clientX, y: e.clientY }; });
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (!down) return;
+  const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y);
+  down = null;
+  if (moved > 6 || tween) return;
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  if (hit) openGarden(hit.object.userData.idx);
+});
+renderer.domElement.addEventListener('pointermove', (e) => {
+  const r = renderer.domElement.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  renderer.domElement.style.cursor = ray.intersectObjects(pickables, false).length ? 'pointer' : 'grab';
+});
+
+// Navigation bar (simplified, large buttons)
+function buildNav() {
+  const nav = document.getElementById('nav');
+  nav.innerHTML = '';
+  const ov = document.createElement('button');
+  ov.className = 'btn primary';
+  ov.textContent = UI[lang].overview;
+  ov.onclick = returnHome;
+  nav.appendChild(ov);
+  GARDENS.forEach((g, i) => {
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.textContent = g.short[lang];
+    b.onclick = () => openGarden(i);
+    nav.appendChild(b);
+  });
+}
+
+function applyLang() {
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('[data-k]').forEach((el) => { el.textContent = UI[lang][el.dataset.k]; });
+  document.getElementById('langBtn').textContent = UI[lang].switch;
+  buildNav();
+  refreshLabels();
+  if (selected !== null) renderPanel(selected);
+}
+
+document.getElementById('langBtn').onclick = () => {
+  lang = lang === 'ar' ? 'en' : 'ar';
+  applyLang();
+};
+
+const creditsModal = document.getElementById('creditsModal');
+document.getElementById('creditsBtn').onclick = () => creditsModal.classList.add('open');
+document.getElementById('creditsClose').onclick = () => creditsModal.classList.remove('open');
+creditsModal.addEventListener('click', (e) => { if (e.target === creditsModal) creditsModal.classList.remove('open'); });
+
+// Animation loop
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+  icons.forEach((ic, i) => { ic.rotation.y = t * 0.6 + i; });
+  pools.forEach((p, i) => { p.ripple.scale.setScalar(1 + 0.12 * Math.sin(t * 2 + i)); });
+  if (selected !== null) pavilions[selected].userData.ring.material.opacity = 0.55 + 0.35 * Math.sin(t * 4);
+  sculpt.rotation.y = Math.sin(t * 0.3) * 0.15;
+  updateTween();
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+
+// Start: cinematic aerial intro, then the park
+applyLang();
+animate();
+loader.classList.add('hide');
+setTimeout(() => { hint.style.opacity = 1; }, 0);
+flyTo(HOME_POS, HOME_T, 6);
+</script>
+</body>
+</html>
