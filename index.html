@@ -552,18 +552,6 @@ entranceSign.scale.set(9, 2.25, 1);
 entranceSign.position.set(0, 9.6, 0);
 entrance.add(entranceSign);
 entrance.position.set(0, 0, R + 4);
-// University logo inside the 3D scene, above the entrance (reuses the embedded image)
-const logoImg = document.querySelector('.logo img');
-if (logoImg) {
-  const logoSprite = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: new THREE.TextureLoader().load(logoImg.src),
-    transparent: true,
-    depthTest: false
-  }));
-  logoSprite.scale.set(10, 10 * (579 / 728), 1);
-  logoSprite.position.set(0, 13.5, 0);
-  entrance.add(logoSprite);
-}
 scene.add(entrance);
 
 // Labels
